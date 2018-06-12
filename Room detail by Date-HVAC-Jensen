@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <title>Usage Report</title>
+    <link rel="stylesheet" type="text/css" media="all" href="{{ report.stylesheet_href }}">
+    <link href='/favicon.ico?v=1106' rel='icon' type='image/x-icon'>
+  </head>
+  <body>
+    <div class="report-wrapper">
+      {% if report.kind == "event" %}
+        <h1 class="header-large txt-center gutter-bottom-small">Room/Resource Usage Report</h1>
+      {% else %}
+        <h1 class="header-large txt-center gutter-bottom-small">{{ report.kind | capitalize }} Usage Report</h1>
+      {% endif %}
+      <h2 class="header-medium txt-center soft gutter-bottom-large">{{ report.scope }}: {{ report.start_date }} through {{ report.end_date }}</h2>
+
+      {% if resources.size != 0 %}
+        <div class="level-1 gutter-bottom-large">
+          <h2 class="header-large date-header gutter-bottom-small">Resources</h2>
+          {% for resource in resources %}
+            <div class="level-2">
+              <h2 class="header-large gutter-bottom-small">{{ resource.name }}</h2>
+            </div>
+            {% if resource.bookings.size == 0 %}
+              <div class="level-2">
+                <div class="soft pad-left gutter-bottom-medium">
+                  No events for this resource.
+                </div>
+              </div>
+            {% else %}
+              <div class="level-2 block gutter-bottom-medium">
+                {% for rb in resource.bookings %}
+                  <ul class="gutter-bottom-small">
+                    <li><span class="status {{ rb.approval_status }}">{{ rb.approval_status }}</span> <strong>{{ rb.starts_at | date: "%A, %B %-d, %-I:%M%P" }} - {{ rb.ends_at | date: "%A, %B %-d, %-I:%M%P" }} </strong> - Quantity: {{ rb.quantity }} - {{ rb.event.name }}</li>
+                  </ul>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if rooms.size != 0 %}
+        <div class="level-1">
+          <h2 class="header-large date-header gutter-bottom-small">Rooms</h2>
+          {% for room in rooms %}
+            {% if room.bookings.size > 0 %}
+              <div class="level-2">
+                <h2 class="header-large gutter-bottom-small">{{ room.name }}</h2>
+              </div>
+              <div class="level-2 block gutter-bottom-medium">
+                {% for rb in room.bookings %}
+                  <ul class="gutter-bottom-small">
+                    <li><span class="status {{ rb.approval_status }}">{{ rb.approval_status }}</span> <strong>{{ rb.starts_at | date: "%A, %B %-d, %-I:%M%P" }} - {{ rb.ends_at | date: "%A, %B %-d, %-I:%M%P" }} </strong> - {{ rb.event.name }}</li>
+                    <div>
+                    <br />
+                    <h4>
+                        <strong><em>Event Time Entries:</em></strong>
+                    </h4>
+                    <br />
+                        {% for instance in rb.event.instances %}
+                            {% if instance.event_times.size > 0 %}
+                                <ul>
+                                    {% for event_time in instance.event_times %}
+                                        
+                                        <li class="divider-soft pad-left item">
+                                            <strong>{{event_time.starts_at  | date: "%-I:%M%P" | downcase }}-{{event_time.ends_at  | date: "%-I:%M%P" | downcase }}:</strong> {{ event_time.name }}
+                                        </li>
+                                        
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="pad-left soft">(No event times defined.)</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                  </ul>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </body>
+</html>
+
